@@ -12,7 +12,7 @@ interface DinerRepository {
     suspend fun get(vararg ids: Int): Set<Diner>
 
     /**
-     *
+     * List all the dietary restrictions of a diner.
      */
     suspend fun list(forDiner: Diner? = null): Set<DietaryRestriction>
 }

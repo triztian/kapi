@@ -1,20 +1,38 @@
 package com.kapi.restaurant
 
 import com.kapi.exposed.psql.PsqlRestaurant
+import com.kapi.exposed.psql.PsqlRestaurantEndorsement
 import com.kapi.exposed.psql.PsqlTable
-import com.kapi.restaurant.RestaurantRepository
-import com.kapi.restaurant.Table
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.inList
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.notInList
+import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.selectAll
+import org.jetbrains.exposed.sql.transactions.transaction
 
 class RestaurantRepositoryPsql : RestaurantRepository {
+    /**
+     *
+     */
     override suspend fun get(id: Int): Restaurant? {
-        PsqlRestaurant.selectAll().where(PsqlRestaurant.id eq id).firstOrNull() ?: return null
-        return Restaurant(id, getRestaurantTables(id))
+        return transaction {
+            PsqlRestaurant.selectAll().where(PsqlRestaurant.id eq id).firstOrNull() ?: return@transaction null
+            Restaurant(id, getRestaurantTables(id))
+        }
     }
 
+    /**
+     *
+     */
     override suspend fun find(withEndorsements: Set<Int>, withoutEndorsements: Set<Int>): Set<Restaurant> {
-        TODO("Not yet implemented")
+        return transaction {
+            (PsqlRestaurantEndorsement innerJoin PsqlRestaurant).select(PsqlRestaurant.columns).where(
+                (PsqlRestaurantEndorsement.dietaryRestrictionId inList withEndorsements.toList()) and
+                        (PsqlRestaurantEndorsement.dietaryRestrictionId notInList withoutEndorsements.toList())
+            ).map {
+                Restaurant(it[PsqlRestaurant.id], getRestaurantTables(it[PsqlRestaurant.id]))
+            }.toSet()
+        }
     }
 
     /**
