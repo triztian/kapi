@@ -32,6 +32,12 @@ dependencies {
     implementation("org.postgresql:postgresql:42.7.2")
 }
 
+val ktorVersion = "2.3.12"
+dependencies {
+    implementation("io.ktor:ktor-server-content-negotiation:$ktorVersion")
+    implementation("io.ktor:ktor-serialization-kotlinx-json:$ktorVersion")
+}
+
 val exposedVersion: String by project
 dependencies {
     implementation("org.jetbrains.exposed:exposed-core:$exposedVersion")

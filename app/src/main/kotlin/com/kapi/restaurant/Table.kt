@@ -1,8 +1,11 @@
 package com.kapi.restaurant
 
+import kotlinx.serialization.Serializable
+
 /**
  * A dining table that can sit patrons.
  */
+@Serializable
 data class Table(
     val id: Int,
     val capacity: Int

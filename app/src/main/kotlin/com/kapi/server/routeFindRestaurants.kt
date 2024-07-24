@@ -15,31 +15,31 @@ import java.time.LocalDateTime
 suspend fun PipelineContext<Unit, ApplicationCall>.routeFindRestaurants(): Unit {
     val dinerStrIds = call.request.queryParameters.getAll("diner")
     if (dinerStrIds == null) {
-        call.respond(HttpStatusCode.BadRequest)
+        call.respond(HttpStatusCode.BadRequest, makeBadRequest("Missing 'diner' parameter"))
         return
     }
 
     val dinerIds = dinerStrIds.mapNotNull { it.toIntOrNull() }.toSet()
     if (dinerStrIds.size != dinerIds.size) {
-        call.respond(HttpStatusCode.BadRequest)
+        call.respond(HttpStatusCode.BadRequest, makeBadRequest("Invalid 'diner' values $dinerStrIds"))
         return
     }
 
     val reservationDatetimeStr = call.request.queryParameters["datetime"]
     if (reservationDatetimeStr == null) {
-        call.respond(HttpStatusCode.BadRequest)
+        call.respond(HttpStatusCode.BadRequest, makeBadRequest("Missing 'datetime' parameter"))
         return
     }
 
     // expect "2015-08-04T10:11:30"
     val reservationDatetime = try {
         LocalDateTime.parse(reservationDatetimeStr)
-    } catch (e : Exception) {
+    } catch (e: Exception) {
         null
     }
 
     if (reservationDatetime == null) {
-        call.respond(HttpStatusCode.BadRequest)
+        call.respond(HttpStatusCode.BadRequest, makeBadRequest("Invalid 'datetime' parameter $reservationDatetimeStr"))
         return
     }
 
