@@ -29,9 +29,11 @@ class SimpleReservationService(
         val dietaryRestrictionIds = dinerRepository.get(ids = dinerIds).flatMap {
             it.dietaryRestrictions.map { it.id }
         }.toSet()
+        println("Dietary Restrictions: $dietaryRestrictionIds")
 
         // Get restaurants that have endorsements against the restrictions
         var restaurants = restaurantRepository.find(dietaryRestrictionIds)
+        println("Restaurants $restaurants")
 
         // Get existing reservations at the specified time for the qualifying restaurants
         val existingReservations = reservationRepository.find(

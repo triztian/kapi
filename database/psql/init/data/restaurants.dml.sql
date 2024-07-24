@@ -56,3 +56,22 @@ insert into tables values
     (5, 1, 2),
     (5, 2, 2)
 ;
+
+insert into restaurant_endorsement values
+    -- Lardo
+    (1, 4), -- Gluten Free
+
+    -- Panaderia Roseta
+    (2, 4), -- Gluten Free
+    (2, 1), -- Vegetarian
+    -- Tetetlan
+    (3, 3), -- Paleo
+    (3, 4), -- Gluten Free
+
+    -- Piano Falling
+    -- No endorsements
+
+    -- Utopia
+    (5, 1), -- Veggie
+    (5, 2)  -- Vegan
+;

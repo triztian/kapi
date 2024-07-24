@@ -12,7 +12,7 @@ import org.jetbrains.exposed.sql.transactions.transaction
 
 class RestaurantRepositoryPsql : RestaurantRepository {
     /**
-     *
+     * Get a specific restaurant by it's ID. If the restaurant does not exist `null` is returned.
      */
     override suspend fun get(id: Int): Restaurant? {
         return transaction {
@@ -22,7 +22,7 @@ class RestaurantRepositoryPsql : RestaurantRepository {
     }
 
     /**
-     *
+     * Finds restaurants that have a given set endorsements and that have a given set of endorsements.
      */
     override suspend fun find(withEndorsements: Set<Int>, withoutEndorsements: Set<Int>): Set<Restaurant> {
         return transaction {

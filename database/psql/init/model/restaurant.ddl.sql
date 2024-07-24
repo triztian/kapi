@@ -18,8 +18,8 @@ create table if not exists restaurant_endorsement (
         references restaurant (id)
             on delete cascade
             on update cascade,
-    constraint fk_dietary_restriction_id foreign key (restaurant_id)
-        references restaurant (id)
+    constraint fk_dietary_restriction_id foreign key (dietary_restriction_id)
+        references dietary_restriction (id)
             on delete cascade
             on update cascade
 );

@@ -7,10 +7,11 @@ import com.kapi.reservation.ReservationService
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.response.*
+import kotlinx.coroutines.runBlocking
 import java.time.LocalDateTime
 
 /**
- *
+ * A route that allows searching for restaurants that support a party size at a given date time
  */
 suspend fun PipelineContext<Unit, ApplicationCall>.routeFindRestaurants(): Unit {
     val dinerStrIds = call.request.queryParameters.getAll("diner")
@@ -31,7 +32,7 @@ suspend fun PipelineContext<Unit, ApplicationCall>.routeFindRestaurants(): Unit 
         return
     }
 
-    // expect "2015-08-04T10:11:30"
+    // expect "2015-08-04T10:11:30.000Z"
     val reservationDatetime = try {
         LocalDateTime.parse(reservationDatetimeStr)
     } catch (e: Exception) {
@@ -47,7 +48,9 @@ suspend fun PipelineContext<Unit, ApplicationCall>.routeFindRestaurants(): Unit 
     val diners = dinerRepository.get(ids = dinerIds.toIntArray())
 
     val reservationService = getInstance<ReservationService>()
-    val results = reservationService.find(diners, reservationDatetime)
+    val results = runBlocking {
+        reservationService.find(diners, reservationDatetime)
+    }
 
     call.respond(results)
 }
