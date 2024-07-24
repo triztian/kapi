@@ -11,7 +11,7 @@ interface ReservationRepository {
     /**
      * Gets a specific reservation by its ID.
      */
-    suspend fun get(id: Int): Reservation
+    suspend fun get(id: Int): Reservation?
 
     /**
      * Performs reservation lookups with simple matching options.

@@ -8,13 +8,13 @@ import java.time.LocalDateTime
 /**
  *
  */
-enum class ReservationStatus {
-    Pending,
-    Confirmed,
-    Finalized,
-    Rescheduled,
-    Cancelled,
-    Abandoned
+enum class ReservationStatus(val value: String) {
+    Pending("pending"),
+    Confirmed("confirmed"),
+    Finalized("finalized"),
+    Rescheduled("rescheduled"),
+    Cancelled("cancelled"),
+    Abandoned("abandoned")
 }
 
 /**
@@ -23,7 +23,7 @@ enum class ReservationStatus {
 data class Reservation(
     val id: Int,
     val status: ReservationStatus,
-    val time: LocalDateTime,
+    val datetime: LocalDateTime,
     val restaurant: Restaurant,
     val tables: Set<Table>,
     val diners: Set<Diner>
