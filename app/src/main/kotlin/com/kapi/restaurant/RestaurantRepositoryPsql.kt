@@ -1,5 +1,7 @@
 package com.kapi.restaurant
 
+import com.kapi.diner.DietaryRestriction
+import com.kapi.exposed.psql.PsqlDietaryRestriction
 import com.kapi.exposed.psql.PsqlRestaurant
 import com.kapi.exposed.psql.PsqlRestaurantEndorsement
 import com.kapi.exposed.psql.PsqlTable
@@ -16,8 +18,9 @@ class RestaurantRepositoryPsql : RestaurantRepository {
      */
     override suspend fun get(id: Int): Restaurant? {
         return transaction {
-            PsqlRestaurant.selectAll().where(PsqlRestaurant.id eq id).firstOrNull() ?: return@transaction null
-            Restaurant(id, getRestaurantTables(id))
+            val result =
+                PsqlRestaurant.selectAll().where(PsqlRestaurant.id eq id).firstOrNull() ?: return@transaction null
+            Restaurant(id, result[PsqlRestaurant.name], getRestaurantTables(id), getRestaurantEndorsements(id))
         }
     }
 
@@ -30,7 +33,12 @@ class RestaurantRepositoryPsql : RestaurantRepository {
                 (PsqlRestaurantEndorsement.dietaryRestrictionId inList withEndorsements.toList()) and
                         (PsqlRestaurantEndorsement.dietaryRestrictionId notInList withoutEndorsements.toList())
             ).map {
-                Restaurant(it[PsqlRestaurant.id], getRestaurantTables(it[PsqlRestaurant.id]))
+                Restaurant(
+                    it[PsqlRestaurant.id],
+                    it[PsqlRestaurant.name],
+                    getRestaurantTables(it[PsqlRestaurant.id]),
+                    getRestaurantEndorsements(it[PsqlRestaurant.id])
+                )
             }.toSet()
         }
     }
@@ -42,5 +50,21 @@ class RestaurantRepositoryPsql : RestaurantRepository {
         return (PsqlTable innerJoin PsqlRestaurant).selectAll().where(PsqlRestaurant.id eq restaurantId).map {
             Table(it[PsqlTable.id], it[PsqlTable.capacity])
         }.toSet()
+    }
+
+    /**
+     * Obtains a list of the endorsements of a given restaurant.
+     */
+    private fun getRestaurantEndorsements(restaurantId: Int): Set<DietaryRestriction> {
+        return (PsqlRestaurantEndorsement innerJoin PsqlDietaryRestriction).select(PsqlDietaryRestriction.columns)
+            .where {
+                PsqlRestaurantEndorsement.restaurantId eq restaurantId
+            }.map {
+                DietaryRestriction(
+                    it[PsqlDietaryRestriction.id],
+                    it[PsqlDietaryRestriction.name],
+                    it[PsqlDietaryRestriction.description]
+                )
+            }.toSet()
     }
 }
