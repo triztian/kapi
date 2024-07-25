@@ -44,6 +44,9 @@ suspend fun PipelineContext<Unit, ApplicationCall>.routeFindRestaurants(): Unit 
         return
     }
 
+    // One could argue that the repositories should be hidden by services but
+    // repositories follow the same DI pattern and in our use case I don't think it warranted the
+    // extra layer of abstraction
     val dinerRepository = getInstance<DinerRepository>()
     val diners = dinerRepository.get(ids = dinerIds.toIntArray())
 

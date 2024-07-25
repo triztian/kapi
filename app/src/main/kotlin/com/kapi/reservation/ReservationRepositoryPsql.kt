@@ -14,12 +14,14 @@ import com.kapi.restaurant.RestaurantRepository
 import com.kapi.restaurant.Table
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.inList
 import org.jetbrains.exposed.sql.and
+import org.jetbrains.exposed.sql.insert
 
 /**
  *
  */
 class ReservationRepositoryPsql(
-    private val restaurantRepository: RestaurantRepository, private val dinerRepository: DinerRepository
+    private val restaurantRepository: RestaurantRepository,
+    private val dinerRepository: DinerRepository,
 ) : ReservationRepository {
     /**
      * Get a reservation by its ID. Returns `null` if the reservation does not exists.
@@ -89,10 +91,33 @@ class ReservationRepositoryPsql(
     }
 
     /**
-     *
+     * Creates a reservation at the given restaurant with the given diners at the given time.
      */
-    override suspend fun create(restaurant: Restaurant, diners: Set<Diner>, atDatetime: LocalDateTime): Reservation {
-        TODO("Not yet implemented")
+    override suspend fun create(restaurant: Restaurant, diners: Set<Diner>, atDatetime: LocalDateTime): Reservation? {
+        return newSuspendedTransaction {
+            val reservationId = PsqlReservation.insert {
+                it[restaurantId] = restaurant.id
+                it[datetime] = atDatetime
+            } get PsqlReservation.id
+
+            diners.forEach { diner ->
+                PsqlReservationDiner.insert {
+                    it[PsqlReservationDiner.dinerId] = diner.id
+                    it[PsqlReservationDiner.reservationId] = reservationId
+                }
+            }
+
+            // TODO: find available tables
+            val availableTables = emptySet<Table>()
+            availableTables.forEach { table ->
+                PsqlReservationTable.insert {
+                    it[PsqlReservationTable.reservationId] = reservationId
+                    it[tableId] = table.id
+                }
+            }
+
+            return@newSuspendedTransaction get(reservationId)
+        }
     }
 
     // -- Support --

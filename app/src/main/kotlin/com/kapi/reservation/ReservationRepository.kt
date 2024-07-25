@@ -30,5 +30,5 @@ interface ReservationRepository {
         restaurant: Restaurant,
         diners: Set<Diner>,
         atDatetime: LocalDateTime
-    ): Reservation
+    ): Reservation?
 }

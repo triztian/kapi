@@ -69,7 +69,7 @@ class SimpleReservationService(
     /**
      * Create a reservation. Throws an exception if not created successfully
      */
-    override suspend fun create(restaurant: Restaurant, diners: Set<Diner>, datetime: LocalDateTime): Reservation {
+    override suspend fun create(restaurant: Restaurant, diners: Set<Diner>, datetime: LocalDateTime): Reservation? {
         return reservationRepository.create(restaurant, diners, datetime)
     }
 }
