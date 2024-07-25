@@ -37,7 +37,7 @@ class ReservationRepositoryPsql(
 
             val diners = (PsqlDiner innerJoin PsqlReservationDiner).select(PsqlDiner.columns)
                 .where(PsqlReservationDiner.reservationId eq id).mapNotNull {
-                    dinerRepository.get(it[PsqlReservationDiner.dinerId])
+                    dinerRepository.get(it[PsqlDiner.id])
                 }.toSet()
 
             return@newSuspendedTransaction Reservation(
@@ -94,7 +94,7 @@ class ReservationRepositoryPsql(
      * Creates a reservation at the given restaurant with the given diners at the given time.
      */
     override suspend fun create(restaurant: Restaurant, diners: Set<Diner>, atDatetime: LocalDateTime): Reservation? {
-        return newSuspendedTransaction {
+        val createdReservationId = newSuspendedTransaction {
             val reservationId = PsqlReservation.insert {
                 it[restaurantId] = restaurant.id
                 it[datetime] = atDatetime
@@ -116,8 +116,10 @@ class ReservationRepositoryPsql(
                 }
             }
 
-            return@newSuspendedTransaction get(reservationId)
+            reservationId
         }
+
+        return get(createdReservationId)
     }
 
     // -- Support --

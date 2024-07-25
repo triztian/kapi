@@ -3,11 +3,14 @@ package com.kapi.reservation
 import com.kapi.restaurant.Restaurant
 import com.kapi.restaurant.Table
 import com.kapi.diner.Diner
+import com.kapi.util.LocalDateTimeSerializer
+import kotlinx.serialization.Serializable
 import java.time.LocalDateTime
 
 /**
  *
  */
+@Serializable
 enum class ReservationStatus(val value: String) {
     Pending("pending"),
     Confirmed("confirmed"),
@@ -18,11 +21,13 @@ enum class ReservationStatus(val value: String) {
 }
 
 /**
- *
+ * A reservation
  */
+@Serializable
 data class Reservation(
     val id: Int,
     val status: ReservationStatus,
+    @Serializable(with = LocalDateTimeSerializer::class)
     val datetime: LocalDateTime,
     val restaurant: Restaurant,
     val tables: Set<Table>,

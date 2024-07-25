@@ -53,13 +53,13 @@ class PGEnum<T : Enum<T>>(enumTypeName: String, enumValue: T?) : PGobject() {
 }
 
 object PsqlReservation : Table("reservation") {
-    val id: Column<Int> = integer("id")
+    val id: Column<Int> = integer("id").autoIncrement()
     val datetime: Column<LocalDateTime> = datetime("datetime")
     // See: https://jetbrains.github.io/Exposed/data-types.html#how-to-use-database-enum-types
     val status: Column<ReservationStatus> = customEnumeration(
         "status",
         "reservation_status",
-        { value -> ReservationStatus.valueOf(value.toString().lowercase()) },
+        { value -> ReservationStatus.entries.first { it.value == value } },
         { PGEnum("reservation_status", it) })
     val restaurantId: Column<Int> = integer("restaurant_id")
     val rescheduleReservationId: Column<Int> = integer("reschedule_reservation_id") references PsqlReservation.id
