@@ -39,8 +39,9 @@ object PsqlRestaurantEndorsement : Table("restaurant_endorsement") {
 }
 
 object PsqlTable : Table("tables") {
-    val id: Column<Int> = integer("table_id")
+    val id: Column<Int> = integer("id")
     val restaurantId: Column<Int> = integer("restaurant_id") references PsqlRestaurant.id
+    val tableId: Column<Int> = integer("table_id")
     val capacity: Column<Int> = integer("capacity")
     override val primaryKey = PrimaryKey(id)
 }
@@ -73,7 +74,7 @@ object PsqlReservationDiner : Table("reservation_diner") {
 }
 
 object PsqlReservationTable : Table("reservation_table") {
-    val reservationId: Column<Int> = integer("reservation_id") references PsqlReservation.id
     val tableId: Column<Int> = integer("table_id") references PsqlTable.id
+    val reservationId: Column<Int> = integer("reservation_id") references PsqlReservation.id
 }
 

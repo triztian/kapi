@@ -49,7 +49,7 @@ class ReservationRepositoryPsql(
                 resultRow[PsqlReservation.status],
                 resultRow[PsqlReservation.datetime],
                 restaurant,
-                emptySet(),
+                listReservationTables(resultRow[PsqlReservation.id]),
                 diners
             )
         }
@@ -98,7 +98,7 @@ class ReservationRepositoryPsql(
      * Creates a reservation at the given restaurant with the given diners at the given time.
      */
     override suspend fun create(restaurant: Restaurant, diners: Set<Diner>, atDatetime: LocalDateTime): Reservation? {
-        val createdReservationId = newSuspendedTransaction {
+        val createdReservationId = transaction {
             val reservationId = PsqlReservation.insert {
                 it[restaurantId] = restaurant.id
                 it[datetime] = atDatetime
@@ -174,7 +174,7 @@ class ReservationRepositoryPsql(
             from 
                 reservation_table as rt 
             inner join 
-                table as t on t.id = rt.table_id
+                tables as t on t.id = rt.table_id
             inner join
                 reservation as r on r.id = rt.reservation_id
             where
@@ -183,8 +183,8 @@ class ReservationRepositoryPsql(
             """.trimIndent().execAndMap {
                 Table(it.getInt("id"), it.getInt("capacity"))
             }.toList().sortedBy { it.capacity }
-        }
+        }.toSet()
 
-        return emptySet()
+        return openTables
     }
 }

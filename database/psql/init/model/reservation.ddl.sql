@@ -28,7 +28,7 @@ create table if not exists reservation (
 );
 
 /**
- * Associates diners to a specific reservation
+ * Associates diners to a specific reservation.
  */
 create table if not exists reservation_diner (
     reservation_id bigint not null,
@@ -45,7 +45,7 @@ create table if not exists reservation_diner (
 );
 
 /**
- * Associates tables reserved for a reservation
+ * Associates tables reserved for a reservation.
  */
 create table if not exists reservation_table (
     reservation_id bigint not null,
@@ -55,8 +55,7 @@ create table if not exists reservation_table (
             on update cascade
             on delete cascade,
     constraint fk_table_id foreign key (table_id)
-        references tables (table_id)
-        on update cascade
-        on delete cascade,
-    primary key (reservation_id, table_id)
+        references tables (id)
+            on update cascade
+            on delete cascade
 );

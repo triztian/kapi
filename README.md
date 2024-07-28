@@ -36,6 +36,16 @@ cd database/psql
 make init model data
 ```
 
+#### Note about ORM
+
+This project uses the exposed kotlin ORM
+
+  * https://jetbrains.github.io/Exposed/home.html
+
+> **NOTE:** While the ORM supports SQL generation, we opted to not use such functionality to show how the database could be 
+generated manually. On larger projects you'd probably want to use your chosen ORM's migration and generation feature
+> set if available.
+
 ### App
 
 The application is written in kotlin, uses koin for DI and exposed for ORM or sql querying.
@@ -58,6 +68,12 @@ for 2 endpoints:
 
   * Find restaurants
   * Create a reservation
+
+#### Testing
+
+In this project, unit testing is only done for some utility functions, as way to show testing, however in a larger
+project we'd want to have coverage using a mock framework such as [MockK](https://mockk.io) and used to mock 
+services and repository to validate underlying implementation.
 
 ## API Endpoints
 
@@ -82,6 +98,7 @@ curl -vvv \
     "atDatetime": "2024-07-25T17:32:00"
 }'
 ```
+
 
 
 
