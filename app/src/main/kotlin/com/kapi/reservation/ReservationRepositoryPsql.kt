@@ -15,6 +15,8 @@ import com.kapi.restaurant.Table
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.inList
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.insert
+import org.jetbrains.exposed.sql.transactions.transaction
+import java.time.format.DateTimeFormatter
 
 /**
  *
@@ -23,8 +25,10 @@ class ReservationRepositoryPsql(
     private val restaurantRepository: RestaurantRepository,
     private val dinerRepository: DinerRepository,
 ) : ReservationRepository {
+    val dateTimeFormatter = DateTimeFormatter.ISO_DATE_TIME
+
     /**
-     * Get a reservation by its ID. Returns `null` if the reservation does not exists.
+     * Get a reservation by its ID. Returns `null` if the reservation does not exist.
      */
     override suspend fun get(id: Int): Reservation? {
         return newSuspendedTransaction {
@@ -107,8 +111,7 @@ class ReservationRepositoryPsql(
                 }
             }
 
-            // TODO: find available tables
-            val availableTables = emptySet<Table>()
+            val availableTables = findTablesForCapacity(atDatetime, diners.size)
             availableTables.forEach { table ->
                 PsqlReservationTable.insert {
                     it[PsqlReservationTable.reservationId] = reservationId
@@ -153,5 +156,35 @@ class ReservationRepositoryPsql(
                     )
                 }.toSet()
         }
+    }
+
+    /**
+     * Finds a set of tables that would support a given number of patrons at a specific time.
+     */
+    private fun findTablesForCapacity(atDatetime: LocalDateTime, capacity: Int): Set<Table> {
+        val hourStart = atDatetime.withHour(atDatetime.hour).format(dateTimeFormatter)
+        val upperHour = atDatetime.plusHours(1)
+        val hourEnd = upperHour.withHour(upperHour.hour).format(dateTimeFormatter)
+        val openTables = transaction {
+            // We'll use raw sql as it is simpler to see the expression,
+            //
+            """
+            select 
+                t.* 
+            from 
+                reservation_table as rt 
+            inner join 
+                table as t on t.id = rt.table_id
+            inner join
+                reservation as r on r.id = rt.reservation_id
+            where
+                date_trunc('hour', r.datetime) between '${hourStart}' and '${hourEnd}'
+            ;
+            """.trimIndent().execAndMap {
+                Table(it.getInt("id"), it.getInt("capacity"))
+            }.toList().sortedBy { it.capacity }
+        }
+
+        return emptySet()
     }
 }

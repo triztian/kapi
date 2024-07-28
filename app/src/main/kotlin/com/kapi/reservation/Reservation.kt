@@ -21,7 +21,7 @@ enum class ReservationStatus(val value: String) {
 }
 
 /**
- * A reservation
+ * A reservation at a restaurant on a set of tables.
  */
 @Serializable
 data class Reservation(
